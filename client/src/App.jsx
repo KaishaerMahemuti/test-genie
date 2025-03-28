@@ -5,6 +5,8 @@ const App = () => {
   const [language, setLanguage] = useState('javascript');
   const [framework, setFramework] = useState('jest');
   const [testOutput, setTestOutput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -15,8 +17,11 @@ const App = () => {
   };
 
   const handleGenerateTest = async () => {
+    if (!code.trim()) return;
+    setIsLoading(true);
+    setTestOutput(""); // Clear old result
+  
     try {
-      console.log("🔥 Generate button clicked");
       const response = await fetch('http://localhost:5002/generate-tests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -24,17 +29,15 @@ const App = () => {
       });
   
       const data = await response.json();
-  
-      if (response.ok) {
-        setTestOutput(data.testCode);
-      } else {
-        setTestOutput(`❌ Error: ${data.error}`);
-      }
+      setTestOutput(response.ok ? data.testCode : `❌ Error: ${data.error}`);
     } catch (err) {
       console.error(err);
       setTestOutput('❌ Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
+  
 
   return (
     <div className="container mt-5">
@@ -83,9 +86,17 @@ const App = () => {
       </div>
 
       <div className="text-center">
-        <button className="btn btn-primary" onClick={handleGenerateTest}>
-          ✨ Generate Tests
-        </button>
+      <button className="btn btn-primary" onClick={handleGenerateTest} disabled={isLoading}>
+  {isLoading ? (
+    <>
+      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      Generating...
+    </>
+  ) : (
+    '✨ Generate Tests'
+  )}
+</button>
+
       </div>
 
       {testOutput && (
