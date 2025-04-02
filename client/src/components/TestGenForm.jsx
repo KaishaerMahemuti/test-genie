@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { db } from '../firebase';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import FileExplorer from './FileExplorer';
 
 const TestGenForm = ({ user }) => {
   const [code, setCode] = useState('');
@@ -6,6 +9,7 @@ const TestGenForm = ({ user }) => {
   const [framework, setFramework] = useState('jest');
   const [testOutput, setTestOutput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [repoUrl, setRepoUrl] = useState('');
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -31,7 +35,16 @@ const TestGenForm = ({ user }) => {
       const testCode = response.ok ? data.testCode : `❌ Error: ${data.error}`;
       setTestOutput(testCode);
 
-      // Optional: You can include Firestore saving here again if needed
+      if (user) {
+        await addDoc(collection(db, 'testGenerations'), {
+          uid: user.uid,
+          code,
+          language,
+          framework,
+          testCode,
+          createdAt: Timestamp.now(),
+        });
+      }
     } catch (err) {
       console.error(err);
       setTestOutput('❌ Network error. Please try again.');
@@ -42,6 +55,26 @@ const TestGenForm = ({ user }) => {
 
   return (
     <>
+      {/* GitHub Repo Loader */}
+      <div className="mb-3">
+        <label className="form-label">GitHub Repo URL (public):</label>
+        <input
+          type="text"
+          className="form-control"
+          placeholder="https://github.com/owner/repo"
+          value={repoUrl}
+          onChange={(e) => setRepoUrl(e.target.value)}
+        />
+      </div>
+
+      {repoUrl && (
+        <FileExplorer
+          repoUrl={repoUrl}
+          onFileSelect={(fileContent) => setCode(fileContent)}
+        />
+      )}
+
+      {/* Manual input section */}
       <div className="mb-3">
         <label className="form-label">Paste your code:</label>
         <textarea
@@ -63,6 +96,7 @@ const TestGenForm = ({ user }) => {
           <label className="form-label">Language</label>
           <select className="form-select" value={language} onChange={(e) => setLanguage(e.target.value)}>
             <option value="javascript">JavaScript</option>
+            <option value="typescript">TypeScript</option>
             <option value="python">Python</option>
             <option value="java">Java</option>
             <option value="swift">Swift</option>
