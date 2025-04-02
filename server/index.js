@@ -22,16 +22,27 @@ app.post('/generate-tests', async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const prompt = `
-You are an expert software tester.
-Generate ${framework} test cases for the following ${language} code.
+  // 🧠 Dynamic prompt builder based on language/framework
+  let prompt = `You are an expert software tester.\n`;
 
-Code:
-${code}
+  switch (language) {
+    case 'javascript':
+      prompt += `Generate test cases using ${framework} for the following JavaScript code.\n`;
+      break;
+    case 'python':
+      prompt += `Generate test cases using ${framework} for the following Python code.\n`;
+      break;
+    case 'java':
+      prompt += `Generate JUnit test cases for the following Java code.\nUse standard JUnit 5 style with proper annotations.\n`;
+      break;
+    case 'swift':
+      prompt += `Generate XCTest test cases for the following Swift code.\nMake sure the tests are in idiomatic Swift.\n`;
+      break;
+    default:
+      prompt += `Generate generic test cases for this ${language} code using ${framework}.\n`;
+  }
 
-Focus on edge cases, include mock functions if needed.
-Output only the test code.
-`;
+  prompt += `\nCode:\n${code}\n\nInclude edge cases. Use mock functions or objects where needed.\nOutput only the test code.`;
 
   try {
     const completion = await openai.chat.completions.create({

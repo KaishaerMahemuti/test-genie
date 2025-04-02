@@ -29,9 +29,7 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="vh-100 d-flex flex-column justify-content-center align-items-center bg-light">
-      <h1 className="mb-4 fw-bold">🧪 Test Genie</h1>  {/* Moved outside the card */}
-  
+    <div className="vh-100 d-flex flex-column justify-content-center align-items-center bg-light">  
       <div className="card shadow p-4" style={{ width: '100%', maxWidth: '400px' }}>
         <p className="text-muted text-center mb-4">Login or Register to Generate Smart Tests</p>
   
