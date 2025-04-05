@@ -10,7 +10,7 @@ const TestGenForm = ({ user }) => {
   const [testOutput, setTestOutput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [repoUrl, setRepoUrl] = useState('');
-
+  const url = 'https://test-genie.onrender.com';
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -25,7 +25,7 @@ const TestGenForm = ({ user }) => {
     setTestOutput("");
 
     try {
-      const response = await fetch('http://localhost:5002/generate-tests', {
+      const response = await fetch(`${url}/generate-tests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, language, framework }),
